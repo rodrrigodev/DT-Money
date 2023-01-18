@@ -1,39 +1,58 @@
+import { useEffect, useState } from "react";
 import { Header } from "../../components/Header";
 import { Summary } from "../../components/Summary";
 import { SearchForm } from "./components/SearchForm";
 import { PriceHighlight, TransationsContainer, TranstionsTable } from "./styles";
 
+interface Transaction {
+    id: number,
+    description: string,
+    type: "income" | "outcome",
+    price: number,
+    category: string,
+    createdAt: string
+}
+
 export function Transations() {
+
+    const [transactions, setTransactions] = useState<Transaction[]>([])
+
+    async function loadTransactions() {
+        const response = await fetch("http://localhost:3000/transactions")
+        const data = await response.json()
+        setTransactions(data)
+    }
+
+    useEffect(() => {
+        loadTransactions()
+    }, [])
+
     return (
         <div>
             <Header />
             <Summary />
 
             <TransationsContainer>
-                <SearchForm/>
+                <SearchForm />
                 <TranstionsTable>
                     <tbody>
-                        <tr>
-                            <td width="50%">Desenvolvimento de site</td>
-                            <td>
-                                <PriceHighlight variant="income">
-                                    R$ 12.000,00
-                                </PriceHighlight>
-                            </td>
-                            <td>Venda</td>
-                            <td>13/04/2022</td>
-                        </tr>
 
-                        <tr>
-                            <td width="50%">Reforma</td>
-                            <td>
-                                <PriceHighlight variant="outcome">
-                                - R$ 2.000,00
-                                </PriceHighlight>
-                                </td>
-                            <td>Casa</td>
-                            <td>15/04/2022</td>
-                        </tr>
+                        {transactions.map((transaction) => {
+                            return (
+                                <tr key={transaction.id}>
+                                    <td width="50%">{transaction.description}</td>
+                                    <td>
+                                        <PriceHighlight variant={transaction.type}>
+                                            {transaction.price}
+                                        </PriceHighlight>
+                                    </td>
+                                    <td>{transaction.category}</td>
+                                    <td>{transaction.createdAt}</td>
+                                </tr>
+
+                            )
+                        })}
+
                     </tbody>
                 </TranstionsTable>
             </TransationsContainer>
